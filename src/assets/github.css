@@ -1,0 +1,136 @@
+pre code.hljs {
+  display: block;
+  overflow-x: auto;
+  padding: 1em;
+}
+
+code.hljs {
+  padding: 3px 5px;
+}
+
+.hljs {
+  color: #d8d8d8;
+  background: transparent;
+}
+
+.hljs::selection,
+.hljs ::selection {
+  background-color: #383838;
+  color: #d8d8d8;
+}
+
+
+/* purposely do not highlight these things */
+.hljs-formula,
+.hljs-params,
+.hljs-property
+{}
+
+/* base03 - #585858 -  Comments, Invisibles, Line Highlighting */
+.hljs-comment {
+  color: #585858;
+}
+
+/* base04 - #b8b8b8 -  Dark Foreground (Used for status bars) */
+.hljs-tag {
+  color: #b8b8b8;
+}
+
+/* base05 - #d8d8d8 -  Default Foreground, Caret, Delimiters, Operators */
+.hljs-subst,
+.hljs-punctuation,
+.hljs-operator {
+  color: #d8d8d8;
+}
+
+.hljs-operator {
+  opacity: 0.7;
+}
+
+/* base08 - Variables, XML Tags, Markup Link Text, Markup Lists, Diff Deleted */
+.hljs-meta .hljs-keyword,
+.hljs-meta .hljs-string,
+.hljs-bullet,
+.hljs-variable,
+.hljs-template-variable,
+.hljs-selector-tag,
+.hljs-name,
+.hljs-deletion {
+  color: #72f088;
+  font-weight: normal;
+}
+
+/* base09 - Integers, Boolean, Constants, XML Attributes, Markup Link Url */
+.hljs-symbol,
+.hljs-link,
+.hljs-attr,
+.hljs-variable.constant_,
+.hljs-keyword,
+.hljs-literal {
+  color: #ff9492;
+}
+
+.hljs-number {
+  color: #91cbff;
+}
+/* base0A - Classes, Markup Bold, Search Text Background */
+.hljs-title,
+.hljs-class .hljs-title,
+.hljs-title.class_
+{
+  color: #f7ca88;
+}
+
+.hljs-strong {
+  color: #f7ca88;
+}
+
+/* base0B - Strings, Inherited Class, Markup Code, Diff Inserted */
+.hljs-code,
+.hljs-addition,
+.hljs-title.class_.inherited__,
+.hljs-string {
+  color: #addcff;
+}
+
+/* base0C - Support, Regular Expressions, Escape Characters, Markup Quotes */
+.hljs-built_in,
+.hljs-doctag, /* guessing */
+.hljs-quote,
+.hljs-keyword.hljs-atrule,
+.hljs-regexp {
+  color: #86c1b9;
+}
+
+/* base0D - Functions, Methods, Attribute IDs, Headings */
+.hljs-function .hljs-title,
+.hljs-attribute,
+.hljs-property,
+.hljs-title.function_,
+.hljs-section {
+  color: #dbb7ff;
+  font-weight: normal;
+}
+
+/* base0E - Keywords, Storage, Selector, Markup Italic, Diff Changed */
+.hljs-type,
+.hljs-selector-id,
+.hljs-selector-class,
+.hljs-selector-attr, 
+.hljs-selector-pseudo, 
+.hljs-template-tag,
+.diff .hljs-meta
+{
+  color: #ba8baf;
+}
+.hljs-emphasis {
+  color: #ba8baf;
+  font-style: italic;
+}
+
+/* base0F - Deprecated, Opening/Closing Embedded Language Tags, e.g. <?php ?> */
+
+.hljs-meta .hljs-keyword,
+/* for v10 compatible themes */
+.hljs-meta-keyword {
+}

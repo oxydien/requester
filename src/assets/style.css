@@ -1,0 +1,97 @@
+html {
+  --status--1-color: #44005f; /* Error color */
+  --status-100-color: #096898;
+  --status-101-color: #064579;
+  --status-102-color: #0764b0;
+  --status-103-color: #1e96f8;
+
+  --status-200-color: #08c935;
+  --status-201-color: #05b76d;
+  --status-202-color: #039440;
+  --status-203-color: #049a31;
+  --status-204-color: #04783e;
+  --status-205-color: #058657;
+  --status-206-color: #02795c;
+  --status-207-color: #026d5f;
+  --status-208-color: #04756f;
+  --status-226-color: #077070;
+
+  --status-300-color: #dfad0c;
+  --status-301-color: #da9605;
+  --status-302-color: #c9a502;
+  --status-303-color: #ab8102;
+  --status-304-color: #866e03;
+  --status-305-color: #9a7b16;
+  --status-307-color: #7a6019;
+  --status-308-color: #6f5720;
+
+  --status-400-color: #c97d66;
+  --status-401-color: #c56148;
+  --status-402-color: #d16e5a;
+  --status-403-color: #c05745;
+  --status-404-color: #bc4c39;
+  --status-405-color: #ff6a54;
+  --status-406-color: #ff5942;
+  --status-407-color: #ff4830;
+  --status-408-color: #ff361e;
+  --status-409-color: #ff250c;
+  --status-410-color: #ff1400;
+  --status-411-color: #9c362d;
+  --status-412-color: #d22919;
+  --status-413-color: #d4200f;
+  --status-414-color: #ed301f;
+  --status-415-color: #cf2111;
+  --status-416-color: #cb2a1b;
+  --status-417-color: #f42c1a;
+  --status-418-color: #d41a09;
+  --status-421-color: #ee2f1e;
+  --status-422-color: #d41907;
+  --status-423-color: #d62212;
+  --status-424-color: #c81f0f;
+  --status-425-color: #e53323;
+  --status-426-color: #b51a0c;
+  --status-428-color: #b2190b;
+  --status-429-color: #cd0f41;
+  --status-431-color: #b4271b;
+  --status-451-color: #7a1b13;
+
+  --status-500-color: #b73214;
+  --status-501-color: #ea3b3b;
+  --status-502-color: #ba5252;
+  --status-503-color: #ff7272;
+  --status-504-color: #ff6161;
+  --status-505-color: #ff5151;
+  --status-506-color: #ff4040;
+  --status-507-color: #ff2f2f;
+  --status-508-color: #ff1f1f;
+  --status-510-color: #ff0e0e;
+  --status-511-color: #ff0e0e;
+}
+
+::-webkit-scrollbar {
+  width: 6px;
+  height: 3px;
+  cursor: pointer;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  border-radius: 5px;
+  background: var(--color-brand-shadow);
+  transition: all 80ms;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-brand-highlight);
+}
+
+a {
+  color: #ff8a00;
+}
+
+#HTTP_METHOD_DROPDOWN .selected {
+  height: 40px;
+}
