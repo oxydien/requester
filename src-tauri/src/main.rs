@@ -2,7 +2,9 @@
 mod filesys;
 mod request;
 use crate::filesys::check_app_path;
-use crate::filesys::config::{create_config, get_config_path, read_config_file, write_config_file};
+use crate::filesys::config::{
+    check_app_version, create_config, get_config_path, read_config_file, write_config_file,
+};
 use crate::filesys::history::create_histories;
 use crate::request::http::{self, make_http_request};
 
@@ -52,9 +54,9 @@ async fn send_netio_req(
         data: data.as_bytes().to_vec(),
     };
 
-    let result = tokio::spawn(async move {
-        crate::request::netio::create_request(options).await
-    }).await.map_err(|e|e.to_string())?;
+    let result = tokio::spawn(async move { crate::request::netio::create_request(options).await })
+        .await
+        .map_err(|e| e.to_string())?;
 
     match result {
         Ok(result) => Ok(result),
@@ -75,6 +77,7 @@ fn clear_http_history() -> Result<(), String> {
 fn main() {
     println!("Starting Requester");
     check_app_path();
+    check_app_version();
     create_histories();
     tauri::Builder::default()
         .invoke_handler(tauri::generate_handler![

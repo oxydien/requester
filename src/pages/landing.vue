@@ -31,6 +31,11 @@
 [id~="e"] {
   text-decoration: none;
 }
+.scroll-top-button {
+  position: absolute;
+  bottom: 45px;
+  right: 18px;
+}
 .changelog-box {
   display: block;
   position: relative;
@@ -45,6 +50,12 @@
     border: 1px solid var(--dark-color-contrast);
     color: var(--dark-color-contrast);
   }
+  &.current {
+    border: 1px solid var(--color-requester-dark);
+    span {
+      color: var(--color-requester);
+    }
+  }
   border-radius: 15px;
   span {
     position: absolute;
@@ -55,10 +66,20 @@
     font-weight: 600;
   }
 }
+h3 {
+  position: sticky;
+  top: 0;
+  display: block;
+  text-align: center;
+  margin: 0;
+  padding: 10px 0;
+  z-index: 50;
+  background-color: var(--color-raised-bg);
+}
 </style>
 
 <template>
-  <div id="landingPage">
+  <div id="landingPage" ref="landingPage">
     <Logo style="margin-top: 50px" />
 
     <div class="flex-grid">
@@ -71,47 +92,31 @@
         <ReqTypeIcon :t="index" /> {{ page }}</Button
       >
     </div>
-    <!--  -->
-    <!-- ############################ CHANGELOG ############################ -->
-    <!--  -->
-    <h3 style="text-align: center">Changelog</h3>
-    <p class="changelog-box">
-      <span>1.1.2</span>
-      Added TCP/UDP requests (alpha), Fixed bugs and made some tweaks...
-      See full changelog on github at
-      <a
-        href="https://github.com/oxydien/http-request-manager/releases"
-        target="_blank"
-        >releases</a
+
+    <h3>Changelog</h3>
+    <div class="changelog-wrapper">
+      <div
+        v-for="change in changelog"
+        :key="change.title"
+        class="changelog-box"
+        :class="{
+          major: change.major,
+          current: change.version === config.version,
+        }"
       >
-    </p>
-    <p class="changelog-box">
-      <span>1.1.1</span>
-      Some bug fixes, QOL enhancements and better request info...<br />
-      See full changelog on github at
-      <a
-        href="https://github.com/oxydien/http-request-manager/releases"
-        target="_blank"
-        >releases</a
-      >
-    </p>
-    <p class="changelog-box major">
-      <span>1.1.0 - major version</span>
-      I completely rewrote this app in just 24 hours, and it's surprisingly
-      functional!<br />
-      See full changelog at
-      <a
-        href="https://github.com/oxydien/http-request-manager/releases"
-        target="_blank"
-        >releases</a
-      ><br />
-      If you'd like to add features, contribute them
-      <a href="https://github.com/oxydien/http-request-manager" target="_blank"
-        >on GitHub</a
-      >.<br />
-      Your contributions are most welcome as we continue to enhance this
-      project.
-    </p>
+        <span>{{ change.title }}</span>
+        <p v-html="change.message"></p>
+      </div>
+    </div>
+    <Button
+      v-if="scrollPosition > 300"
+      class="scroll-top-button"
+      iconOnly
+      @click="scrollToTop"
+    >
+      <UpIcon />
+    </Button>
+
     <div class="e">
       &#77;&#97;&#100;&#101;&#32;&#98;&#121;&#32;
       <a id="e">&#111;&#120;&#121;&#100;&#105;&#101;&#110;</a>
@@ -124,17 +129,21 @@ import { defineComponent } from "vue";
 import { invoke } from "@tauri-apps/api/tauri";
 import { Button } from "omorphia";
 import ReqTypeIcon from "../components/icons/ReqTypeIcon.vue";
+import UpIcon from "../components/icons/UpIcon.vue";
 import Logo from "../components/icons/Logo.vue";
+import { changelog } from "../utils/changelog";
 
 export default defineComponent({
   components: {
     Button,
     ReqTypeIcon,
     Logo,
+    UpIcon,
   },
   data() {
     return {
-      config: { pages: [] },
+      config: { pages: [], version: "" },
+      scrollPosition: 0,
     };
   },
   mounted() {
@@ -142,10 +151,40 @@ export default defineComponent({
     eval(
       "\x64\x6F\x63\x75\x6D\x65\x6E\x74\x2E\x67\x65\x74\x45\x6C\x65\x6D\x65\x6E\x74\x42\x79\x49\x64\x28\x22\x65\x22\x29\x2E\x68\x72\x65\x66\x20\x3D\x20\x22\x68\x74\x74\x70\x73\x3A\x2F\x2F\x67\x69\x74\x68\x75\x62\x2E\x63\x6F\x6D\x2F\x6F\x78\x79\x64\x69\x65\x6E\x22\x3B\x64\x6F\x63\x75\x6D\x65\x6E\x74\x2E\x67\x65\x74\x45\x6C\x65\x6D\x65\x6E\x74\x42\x79\x49\x64\x28\x22\x65\x22\x29\x2E\x74\x61\x72\x67\x65\x74\x20\x3D\x20\x22\x5F\x62\x6C\x61\x6E\x6B\x22\x3B"
     );
+    this.$refs["landingPage"].addEventListener("scroll", this.handleScroll);
+  },
+  beforeUnmount() {
+    this.$refs["landingPage"].removeEventListener("scroll", this.handleScroll);
   },
   methods: {
     async getConfig() {
       this.config = JSON.parse(await invoke("get_config_values"));
+    },
+    scrollToTop() {
+      this.$refs["landingPage"].scrollTo({
+        top: 0,
+        behavior: "smooth",
+      });
+    },
+    handleScroll() {
+      this.scrollPosition = this.$refs["landingPage"].scrollTop;
+    },
+  },
+  computed: {
+    changelog() {
+      const sortedChangelog = changelog.slice().sort((a, b) => {
+        const versionA = a.version.split(".").map(Number);
+        const versionB = b.version.split(".").map(Number);
+
+        for (let i = 0; i < Math.min(versionA.length, versionB.length); i++) {
+          if (versionA[i] !== versionB[i]) {
+            return versionB[i] - versionA[i];
+          }
+        }
+        return versionB.length - versionA.length;
+      });
+
+      return sortedChangelog;
     },
   },
 });

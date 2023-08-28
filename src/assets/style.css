@@ -66,6 +66,9 @@ html {
   --status-508-color: #ff1f1f;
   --status-510-color: #ff0e0e;
   --status-511-color: #ff0e0e;
+
+  --color-requester: #ff8a00;
+  --color-requester-dark: #804808;
 }
 
 ::-webkit-scrollbar {
@@ -80,16 +83,16 @@ html {
 
 ::-webkit-scrollbar-thumb {
   border-radius: 5px;
-  background: var(--color-brand-shadow);
+  background: var(--color-requester);
   transition: all 80ms;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: var(--color-brand-highlight);
+  background: var(--color-requester-dark);
 }
 
 a {
-  color: #ff8a00;
+  color: var(--color-requester);
 }
 
 #HTTP_METHOD_DROPDOWN .selected {

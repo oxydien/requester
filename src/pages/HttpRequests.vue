@@ -32,8 +32,10 @@
   padding-left: calc(var(--gap-sm) * 1.5);
 
   h4 {
-    display: flex;
+    display: grid;
+    grid-template-columns: 160px 4.5fr 150px;
     align-items: center;
+    margin: 0;
     gap: 10px;
   }
   .time {
@@ -198,6 +200,14 @@
             v-model="request.url"
             @keydown.enter="sendRequest"
           />
+          <div
+            class="btn icon-only"
+            style="width: 50px; height: 40px"
+            v-show="!validateUrl(generateURL) && generateURL !== ''"
+            title="The URL is not valid!"
+          >
+            <ReportIcon />
+          </div>
           <Button
             iconOnly
             style="width: 50px; height: 40px"
@@ -290,18 +300,16 @@
             <h5>Request Body ({{ request.body.length }})</h5>
           </div>
           <div class="section body" v-if="show.ReqBody">
-            <textarea
-              name="reqBody"
-              id="reqBody"
+            <BodyBuilder
               style="
                 min-height: 200px;
                 width: 100%;
                 max-width: calc(100% - 10px);
-                margin: 10px 5px;
+                margin: 5px 5px;
               "
-              placeholder="Request body..."
+              :headers="request.headers"
               v-model="request.body"
-            ></textarea>
+            ></BodyBuilder>
           </div>
         </section>
         <Button
@@ -333,7 +341,14 @@
               <span class="url"> {{ item.request.url }}</span>
 
               <span class="time">
-                {{ item.time ? item.time + "ms" : "waiting..." }} |
+                {{
+                  item.time !== null
+                    ? item.time !== -2
+                      ? item.time + "ms"
+                      : "Error "
+                    : "waiting..."
+                }}
+                |
                 <span
                   :style="{
                     color: `var(--status-${item.response.status_code}-color)`,
@@ -406,7 +421,7 @@
                     "
                   >
                     <OpenArrowIcon :open="show.Response[index].request.body" />
-                    <h4>Request body</h4>
+                    <h5>Request body</h5>
                   </div>
                   <div
                     v-if="show.Response[index].request.body"
@@ -595,11 +610,21 @@ import {
   SendIcon,
   ClipboardCopyIcon,
   Chips,
+  ReportIcon,
 } from "omorphia";
 import { invoke } from "@tauri-apps/api/tauri";
 import OpenArrowIcon from "../components/icons/OpenArrowIcon.vue";
 import JsonHighlight from "../components/JsonHighlight.vue";
 import HttpRequestInfo from "../components/HttpRequestInfo.vue";
+import BodyBuilder from "../components/BodyBuilder.vue";
+import {
+  defaultOpenResponseTabs,
+  defaultClosedResponseTabs,
+  findContentTypeInHeaders,
+  parseUrlToQueries,
+  validateUrl,
+} from "../utils/http";
+import { copyToClipboard, deepCopy } from "../utils/simple";
 export default {
   components: {
     OpenArrowIcon,
@@ -612,6 +637,8 @@ export default {
     Chips,
     JsonHighlight,
     HttpRequestInfo,
+    BodyBuilder,
+    ReportIcon,
   },
   data() {
     return {
@@ -654,15 +681,14 @@ export default {
     },
     async sendRequest() {
       if (this.generateURL !== "") {
-        let method = this.method;
-        let url = this.generateURL;
-        let data = this.request.body;
-        let headers = this.request.headers;
         let request = {
-          method: method,
-          url: url,
-          data: data,
-          headers: headers.map((header) => [header.name, header.value]),
+          method: this.method,
+          url: this.generateURL,
+          data: this.request.body,
+          headers: this.request.headers.map((header) => [
+            header.name,
+            header.value,
+          ]),
         };
         let requestInfo = {
           request: request,
@@ -670,16 +696,11 @@ export default {
           time: null,
         };
         this.responses.unshift(requestInfo);
-        this.show.Response.unshift({
-          open: true,
-          request: { all: false, headers: false, body: true },
-          response: { all: true, headers: false, body: true, bodyType: "raw" },
-        });
+        this.show.Response.unshift(defaultOpenResponseTabs);
         console.log("Sending request", request);
         this.requestInProgress = true;
         try {
           let response = await invoke("send_request", request);
-          console.log("response", response);
           this.responses[0] = response;
           this.loadHistory().then(() => {
             this.show.Response[0].open = true;
@@ -688,7 +709,7 @@ export default {
           this.responses[0] = {
             request: request,
             response: { error: e, status_code: -1 },
-            time: -1,
+            time: -2,
           };
         } finally {
           this.requestInProgress = false;
@@ -699,52 +720,17 @@ export default {
       }
     },
     copyToClipboard(text, ref) {
-      navigator.clipboard.writeText(text);
       let el = this.$refs[ref];
-      el[0].innerText = "Copied";
-      setTimeout(() => {
-        el[0].innerText = "Copy";
-      }, 1500);
+      copyToClipboard(text, el);
     },
     findContentType(headers) {
-      if (!headers) {
-        return "text";
-      }
-
-      const contentTypeHeader = headers.find(
-        (header) => header.name.toLowerCase() === "content-type"
-      );
-
-      if (contentTypeHeader) {
-        const contentTypeValue = contentTypeHeader.value.toLowerCase();
-        if (
-          contentTypeValue.includes("html") ||
-          contentTypeValue.includes("htm")
-        ) {
-          return "html";
-        } else if (contentTypeValue.includes("json")) {
-          return "json";
-        } else if (
-          contentTypeValue.includes("image") ||
-          contentTypeValue.includes("img")
-        ) {
-          return "image";
-        } else {
-          return "text";
-        }
-      }
-
-      return "text";
+      return findContentTypeInHeaders(headers);
     },
     async loadHistory() {
       let history = await invoke("read_http_history");
       history = JSON.parse(history);
       history.forEach(() => {
-        this.show.Response.unshift({
-          open: false,
-          request: { all: true, headers: false, body: false },
-          response: { all: true, headers: false, body: true, bodyType: "raw" },
-        });
+        this.show.Response.unshift(deepCopy(defaultClosedResponseTabs));
       });
       this.responses = history;
     },
@@ -790,23 +776,7 @@ export default {
       });
     },
     parseQueries(url) {
-      const queryIndex = url.indexOf("?");
-      if (queryIndex === -1) {
-        return [];
-      }
-
-      const queryString = url.slice(queryIndex + 1);
-      const queryPairs = queryString.split("&");
-      const queries = [];
-
-      queryPairs.forEach((pair) => {
-        const [name, value] = pair.split("=");
-        const decodedName = decodeURIComponent(name);
-        const decodedValue = decodeURIComponent(value);
-        queries.push({ name: decodedName, value: decodedValue });
-      });
-
-      return queries;
+      return parseUrlToQueries(url);
     },
     async loadConfig() {
       let config = await invoke("get_config_values");
@@ -816,6 +786,9 @@ export default {
         this.request.queries = this.config.defaults.queries;
         this.request.body = this.config.defaults.body;
       }
+    },
+    validateUrl(url) {
+      return validateUrl(url);
     },
   },
   computed: {
