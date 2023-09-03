@@ -15,23 +15,42 @@
 </style>
 
 <template>
-  <div class="wrapper">
+  <div class="wrapper" v-if="typeof loaded !== 'string' && loaded">
     <NavHolder />
     <RouterView class="page" />
   </div>
+  <NotLoaded
+    v-else
+    :message="loaded || 'Loading..'"
+    @dblclick="loaded = true"
+  />
 </template>
 
 <script>
 import { defineComponent } from "vue";
 import NavHolder from "./components/nav/NavHolder.vue";
+import NotLoaded from "./pages/NotLoaded.vue";
 import { invoke } from "@tauri-apps/api";
 
 export default defineComponent({
   components: {
     NavHolder,
+    NotLoaded,
+  },
+  data() {
+    return {
+      loaded: false,
+    };
   },
   created() {
     invoke("app_loaded");
+  },
+  mounted() {
+    if (!window.__TAURI_IPC__) {
+      this.loaded = "Unable to connect to Tauri backend";
+    } else {
+      this.loaded = true;
+    }
   },
 });
 </script>

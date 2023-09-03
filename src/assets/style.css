@@ -71,6 +71,11 @@ html {
   --color-requester-dark: #804808;
 }
 
+body {
+  --color-brand: #ff8a00 !important;
+  --color-brand-shadow: #ff8800ab !important;
+}
+
 ::-webkit-scrollbar {
   width: 6px;
   height: 3px;

@@ -53,4 +53,15 @@ export const changelog = [
       >releases</a
     >`,
   },
+  {
+    major: false,
+    title: "1.1.4",
+    version: "1.1.4",
+    message: `Remade the config.<br />
+      Full changelog at <a
+      href="https://github.com/oxydien/requester/releases"
+      target="_blank"
+      >releases</a
+    >`,
+  },
 ];

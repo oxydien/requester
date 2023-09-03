@@ -101,10 +101,14 @@
   }
 }
 
-.send-button {
-  width: calc(100% - 20px);
-  margin: 10px;
-  text-align: center;
+.send-wrapper {
+  display: flex;
+  gap: var(--gap-sm);
+  .send-button {
+    width: calc(100% - 20px);
+    margin: 10px;
+    text-align: center;
+  }
 }
 
 .section.headers,
@@ -303,7 +307,7 @@
             <BodyBuilder
               style="
                 min-height: 200px;
-                width: 100%;
+                min-width: calc(100% - 10px);
                 max-width: calc(100% - 10px);
                 margin: 5px 5px;
               "
@@ -312,14 +316,16 @@
             ></BodyBuilder>
           </div>
         </section>
-        <Button
-          @click="sendRequest"
-          color="secondary"
-          :disabled="this.generateURL == '' || requestInProgress"
-          class="send-button"
-        >
-          <SendIcon />Send Request
-        </Button>
+        <div class="send-wrapper">
+          <Button
+            @click="sendRequest"
+            color="secondary"
+            :disabled="this.generateURL == '' || requestInProgress"
+            class="send-button"
+          >
+            <SendIcon />Send Request
+          </Button>
+        </div>
       </div>
     </section>
     <!-- ################################### Responses ################################### -->
@@ -538,7 +544,7 @@
                         ></iframe>
                       </div>
                       <div
-                        v-if="
+                        v-else-if="
                           findContentType(item.response.headers) == 'image' &&
                           show.Response[index].response.bodyType == 'preview'
                         "
@@ -689,6 +695,7 @@ export default {
             header.name,
             header.value,
           ]),
+          timeout: this.request.timeout,
         };
         let requestInfo = {
           request: request,
@@ -782,9 +789,11 @@ export default {
       let config = await invoke("get_config_values");
       this.config = JSON.parse(config);
       if (config) {
-        this.request.headers = this.config.defaults.headers;
-        this.request.queries = this.config.defaults.queries;
-        this.request.body = this.config.defaults.body;
+        this.request.url = this.config.http.defaults.url;
+        this.request.method = this.config.http.defaults.method;
+        this.request.headers = this.config.http.defaults.headers;
+        this.request.queries = this.config.http.defaults.queries;
+        this.request.body = this.config.http.defaults.body;
       }
     },
     validateUrl(url) {

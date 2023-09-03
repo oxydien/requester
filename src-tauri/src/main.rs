@@ -1,12 +1,14 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 mod filesys;
 mod request;
-use crate::filesys::check_app_path;
-use crate::filesys::config::{
-    check_app_version, create_config, get_config_path, read_config_file, write_config_file,
-};
-use crate::filesys::history::create_histories;
+mod utils;
+
+use filesys::config::open_config_in_editor;
+use utils::log::{LogLevel, LOG};
+
+use crate::filesys::config::{create_config, get_config_path, read_config_file, write_config_file};
 use crate::request::http::{self, make_http_request};
+use crate::utils::on_start;
 
 #[tauri::command]
 fn get_config_values() -> String {
@@ -20,7 +22,7 @@ fn get_config_values() -> String {
 
 #[tauri::command]
 async fn app_loaded() -> Result<(), String> {
-    println!("App loaded!");
+    LOG(LogLevel::Debug, "app_loaded", "App loaded!".to_string());
     Ok(())
 }
 
@@ -74,11 +76,14 @@ fn clear_http_history() -> Result<(), String> {
     Ok(http::clear_history_file().unwrap())
 }
 
+#[tauri::command]
+fn open_config() -> Result<(), String> {
+    open_config_in_editor();
+    Ok(())
+}
+
 fn main() {
-    println!("Starting Requester");
-    check_app_path();
-    check_app_version();
-    create_histories();
+    on_start();
     tauri::Builder::default()
         .invoke_handler(tauri::generate_handler![
             app_loaded,
@@ -87,7 +92,8 @@ fn main() {
             get_config_values,
             save_config,
             read_http_history,
-            clear_http_history
+            clear_http_history,
+            open_config
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

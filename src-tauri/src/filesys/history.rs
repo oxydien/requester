@@ -1,5 +1,6 @@
 use crate::filesys::get_app_path;
 use crate::request::http::RequestResponse;
+use crate::utils::log::{LogLevel, LOG};
 use serde::{Deserialize, Serialize};
 use serde_json::Error as JSONError;
 use std::io::Error as IOError;
@@ -33,6 +34,11 @@ pub fn create_histories() -> () {
     let app_path = get_app_path();
     let folder_path = app_path.join("histories");
     if !folder_path.exists() {
+        LOG(
+            LogLevel::Info,
+            "create_histories",
+            "Path not found, Creating.".to_string(),
+        );
         let _ = fs::create_dir_all(folder_path.clone());
     }
     let mut paths: Vec<PathBuf> = Vec::new();
@@ -41,11 +47,14 @@ pub fn create_histories() -> () {
 
     for path in paths {
         if !path.exists() {
+            LOG(
+                LogLevel::Info,
+                "create_histories",
+                format!("history {} not found, Creating.", path.display()),
+            );
             let empty_history: Vec<RequestResponse> = Vec::new();
             let history_json = serde_json::to_string_pretty(&empty_history).map_err(|e| e);
             let _ = fs::write(&path, history_json.unwrap());
         }
     }
 }
-
-

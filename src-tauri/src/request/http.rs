@@ -1,4 +1,7 @@
-use crate::filesys::get_app_path;
+use crate::{
+    filesys::{config::get_config_values, get_app_path},
+    utils::log::{LogLevel, LOG},
+};
 use reqwest::header::{HeaderMap, HeaderName, HeaderValue};
 use serde::{Deserialize, Serialize};
 use std::fs;
@@ -85,7 +88,11 @@ pub async fn make_http_request(
                 .collect(),
         );
     }
-
+    LOG(
+        LogLevel::Info,
+        "make_http_request",
+        format!("Sending HTTP request: Method:'{}', Url:'{}'", method, url),
+    );
     let start_time = std::time::Instant::now();
     let response = request_builder.send().await.map_err(|e| e.to_string())?;
     let end_time = std::time::Instant::now();
@@ -127,7 +134,7 @@ pub async fn make_http_request(
     Ok(json_result)
 }
 
-const MAX_HISTORY_ENTRIES: usize = 100;
+// const MAX_HISTORY_ENTRIES: usize = 100;
 
 pub fn append_to_history(
     data: RequestResponse,
@@ -140,8 +147,20 @@ pub fn append_to_history(
     let mut existing_history: Vec<RequestResponse> = serde_json::from_str(&existing_history_str)?;
 
     // Remove oldest entries if the history exceeds the maximum size
-    if existing_history.len() >= MAX_HISTORY_ENTRIES {
-        let num_entries_to_remove = existing_history.len() - MAX_HISTORY_ENTRIES + 1;
+    let config_values = get_config_values();
+    let max_history_entries: usize;
+    if let Some(save_amount) = config_values["http"]["history"]["save_amount"].as_u64() {
+        if save_amount <= usize::MAX as u64 {
+            max_history_entries = save_amount as usize;
+        } else {
+            max_history_entries = 100;
+        }
+    } else {
+        max_history_entries = 100;
+    }
+
+    if existing_history.len() >= max_history_entries {
+        let num_entries_to_remove = existing_history.len() - max_history_entries + 1;
         existing_history.drain(0..num_entries_to_remove);
     }
 

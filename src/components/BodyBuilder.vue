@@ -108,7 +108,7 @@ export default {
       required: true,
     },
     style: {
-      type: String,
+      type: Object,
       default: "",
     },
   },

@@ -13,27 +13,30 @@
   gap: var(--gap-sm);
   flex-flow: row wrap;
   justify-content: center;
-  width: 60%;
-  background-color: var(--color-super-raised-bg);
+  width: 80%;
   padding: var(--gap-sm);
   border-radius: var(--radius-sm);
   margin: 0 auto;
 }
 [class~="e"] {
   position: absolute;
+  background-color: var(--color-raised-bg);
+  padding: 10px;
+  border-radius: 20px 0 0 0;
+  z-index: 60;
 }
 [class~="e"] {
-  bottom: 15pt;
+  bottom: var(--gap-sm);
 }
 [class~="e"] {
-  right: 15pt;
+  right: 13pt;
 }
 [id~="e"] {
   text-decoration: none;
 }
 .scroll-top-button {
   position: absolute;
-  bottom: 45px;
+  bottom: 48px;
   right: 18px;
 }
 .changelog-box {
@@ -45,15 +48,18 @@
   margin: 30px 0;
   padding: 10px;
   text-align: center;
-  border: 1px solid var(--dark-color-base);
+  border: 1px solid var(--_color);
+  --_color: var(--dark-color-base);
   &.major {
-    border: 1px solid var(--dark-color-contrast);
-    color: var(--dark-color-contrast);
+    --_color: var(--dark-color-contrast);
+    border: 1px solid var(--_color);
+    color: var(--_color);
   }
   &.current {
+    --_color: var(--color-requester);
     border: 1px solid var(--color-requester-dark);
     span {
-      color: var(--color-requester);
+      color: var(--_color);
     }
   }
   border-radius: 15px;
@@ -62,6 +68,8 @@
     top: -10px;
     left: 30px;
     background-color: var(--color-raised-bg);
+    border-radius: 6px;
+    border: 1px solid var(--_color);
     padding: 0 5px;
     font-weight: 600;
   }
@@ -76,10 +84,19 @@ h3 {
   z-index: 50;
   background-color: var(--color-raised-bg);
 }
+.settings-button {
+  position: absolute;
+  top: 15px;
+  right: 20px;
+  background-color: transparent;
+}
 </style>
 
 <template>
   <div id="landingPage" ref="landingPage">
+    <Button class="settings-button" iconOnly link="/settings/"
+      ><SettingsIcon
+    /></Button>
     <Logo style="margin-top: 50px" />
 
     <div class="flex-grid">
@@ -104,7 +121,10 @@ h3 {
           current: change.version === config.version,
         }"
       >
-        <span>{{ change.title }}</span>
+        <span
+          >{{ change.title
+          }}{{ change.version === config.version ? " - current" : "" }}</span
+        >
         <p v-html="change.message"></p>
       </div>
     </div>
@@ -124,10 +144,9 @@ h3 {
   </div>
 </template>
 <script>
-// This page was made in rush
 import { defineComponent } from "vue";
 import { invoke } from "@tauri-apps/api/tauri";
-import { Button } from "omorphia";
+import { Button, SettingsIcon } from "omorphia";
 import ReqTypeIcon from "../components/icons/ReqTypeIcon.vue";
 import UpIcon from "../components/icons/UpIcon.vue";
 import Logo from "../components/icons/Logo.vue";
@@ -136,6 +155,7 @@ import { changelog } from "../utils/changelog";
 export default defineComponent({
   components: {
     Button,
+    SettingsIcon,
     ReqTypeIcon,
     Logo,
     UpIcon,
