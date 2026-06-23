@@ -16,18 +16,16 @@
   max-width: calc(100% - 20px);
   height: 300px;
 }
-
-.error {
-  border: 3px solid var(--color-red);
-  color: var(--color-red);
-  border-radius: var(--radius-md);
-  margin: var(--gap-sm);
-  padding: var(--gap-sm);
-}
 </style>
 
 <template>
   <div id="NetIORequestPage">
+    <div class="error">
+      This page is currently a work in progress. Unfortunately, since there's no
+      available method for testing this particular feature, it remains
+      incomplete until someone contributes it on GitHub.
+    </div>
+
     <section>
       <div class="section">
         <div class="addr-holder">
@@ -62,11 +60,6 @@
         <SendIcon />Send request
       </Button>
     </section>
-    <div class="error">
-      This page is currently a work in progress. Unfortunately, since there's no
-      available method for testing this particular feature, it remains
-      incomplete until someone contributes it on GitHub.
-    </div>
     <section>
       <highlightjs
         autodetect
@@ -76,7 +69,7 @@
   </div>
 </template>
 <script>
-import { invoke } from "@tauri-apps/api/tauri";
+import { invoke } from "@tauri-apps/api/core";
 import {
   DropdownSelect,
   Button,

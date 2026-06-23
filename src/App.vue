@@ -24,7 +24,7 @@
 <script>
 import { defineComponent } from "vue";
 import NavHolder from "./components/nav/NavHolder.vue";
-import { invoke } from "@tauri-apps/api";
+import { invoke } from "@tauri-apps/api/core";
 
 export default defineComponent({
   components: {

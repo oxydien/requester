@@ -6,7 +6,7 @@ use crate::filesys::config::{
     check_app_version, create_config, get_config_path, read_config_file, write_config_file,
 };
 use crate::filesys::history::create_histories;
-use crate::request::http::{self, make_http_request};
+use crate::request::http::{self, make_http_request, RequestResponse};
 
 #[tauri::command]
 fn get_config_values() -> String {
@@ -28,16 +28,15 @@ async fn app_loaded() -> Result<(), String> {
 fn save_config(args: &str) -> Result<(), String> {
     Ok(write_config_file(args).unwrap())
 }
+
 #[tauri::command]
 async fn send_request(
     method: &str,
     url: &str,
     data: Option<&str>,
     headers: Option<Vec<(&str, &str)>>,
-) -> Result<String, String> {
-    make_http_request(method, url, data, headers)
-        .await
-        .map_err(|err| err.to_string())
+) -> Result<RequestResponse, String> {
+    make_http_request(method, url, data, headers).await
 }
 
 #[tauri::command]
@@ -77,9 +76,15 @@ fn clear_http_history() -> Result<(), String> {
 fn main() {
     println!("Starting Requester");
     check_app_path();
+    if !get_config_path().exists() {
+        create_config();
+    }
     check_app_version();
     create_histories();
     tauri::Builder::default()
+        .plugin(tauri_plugin_clipboard_manager::init())
+        .plugin(tauri_plugin_os::init())
+        .plugin(tauri_plugin_shell::init())
         .invoke_handler(tauri::generate_handler![
             app_loaded,
             send_request,

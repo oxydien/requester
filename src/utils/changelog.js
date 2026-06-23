@@ -53,4 +53,15 @@ export const changelog = [
       >releases</a
     >`,
   },
+  {
+    major: false,
+    title: "1.1.4",
+    version: "1.1.4",
+    message: `Migrated to Tauri v2. Optimizations to http body rendering. Added new JSON preview. Vue cleaning and polishing ui. QOL.<br />
+      Full changelog at <a
+      href="https://github.com/oxydien/requester/releases"
+      target="_blank"
+      >releases</a
+    >`,
+  },
 ];

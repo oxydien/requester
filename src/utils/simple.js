@@ -1,11 +1,14 @@
+import {writeText} from "@tauri-apps/plugin-clipboard-manager";
+
 export function copyToClipboard(text, el) {
-  navigator.clipboard.writeText(text);
-  if (el) {
-    el[0].innerText = "Copied";
-    setTimeout(() => {
-      el[0].innerText = "Copy";
-    }, 1500);
-  }
+  writeText(text).then(_ => {
+    if (el) {
+      el.innerText = "Copied";
+      setTimeout(() => {
+        el.innerText = "Copy";
+      }, 1500);
+    }
+  });
 }
 
 export const deepCopy = (obj) => {

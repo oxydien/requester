@@ -1,4 +1,4 @@
-use std::{path::PathBuf, fs};
+use std::{fs, path::PathBuf};
 pub mod config;
 pub mod history;
 
@@ -13,7 +13,8 @@ pub fn get_app_path() -> PathBuf {
             Err(_) => panic!("Failed to get the %APPDATA% environment variable."),
         }
     } else {
-        let mut path = PathBuf::from("/etc");
+        let mut path = PathBuf::from(std::env::var("HOME").unwrap_or_else(|_| ".".to_string()));
+        path.push(".local");
         path.push("oxy-requester");
         path
     }
@@ -22,6 +23,9 @@ pub fn get_app_path() -> PathBuf {
 pub fn check_app_path() -> () {
     let app_path = get_app_path();
     if !app_path.exists() {
-        let _ = fs::create_dir_all(app_path);
+        println!("Creating app path at {:?}", app_path);
+        if let Err(e) = fs::create_dir_all(app_path) {
+            println!("Failed to create app path: {}", e);
+        }
     }
 }

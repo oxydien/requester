@@ -125,13 +125,13 @@ h3 {
 </template>
 <script>
 // This page was made in rush
-import { defineComponent } from "vue";
-import { invoke } from "@tauri-apps/api/tauri";
-import { Button } from "omorphia";
+import {defineComponent} from "vue";
+import {invoke} from "@tauri-apps/api/core";
+import {Button} from "omorphia";
 import ReqTypeIcon from "../components/icons/ReqTypeIcon.vue";
 import UpIcon from "../components/icons/UpIcon.vue";
 import Logo from "../components/icons/Logo.vue";
-import { changelog } from "../utils/changelog";
+import {changelog} from "../utils/changelog";
 
 export default defineComponent({
   components: {
@@ -172,7 +172,7 @@ export default defineComponent({
   },
   computed: {
     changelog() {
-      const sortedChangelog = changelog.slice().sort((a, b) => {
+      return changelog.slice().sort((a, b) => {
         const versionA = a.version.split(".").map(Number);
         const versionB = b.version.split(".").map(Number);
 
@@ -183,8 +183,6 @@ export default defineComponent({
         }
         return versionB.length - versionA.length;
       });
-
-      return sortedChangelog;
     },
   },
 });

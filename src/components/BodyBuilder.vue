@@ -98,6 +98,15 @@ export default {
     CheckIcon,
     XIcon,
   },
+  watch: {
+    modelValue(newValue) {
+      if (this.value !== newValue) {
+        this.value = newValue;
+        this.isBodyJson = this.checkForJson();
+        this.isBodyXml = this.checkForXML();
+      }
+    }
+  },
   props: {
     headers: {
       type: Array,
@@ -159,10 +168,12 @@ export default {
           spanMessage.innerText = type.toUpperCase();
         }, 3000);
       } else {
-        this.headers.push({
-          name: "content-type",
-          value: "application/" + type,
-        });
+        const updatedHeaders = [
+          ...this.headers,
+          { name: "content-type", value: "application/" + type }
+        ];
+        this.$emit("update:headers", updatedHeaders);
+
         spanMessage.innerText = `Added ${type} Content-Type header`;
         setTimeout(() => {
           spanMessage.innerText = type.toUpperCase();

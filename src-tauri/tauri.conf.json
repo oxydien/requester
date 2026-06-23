@@ -2,43 +2,27 @@
   "build": {
     "beforeDevCommand": "npm run dev",
     "beforeBuildCommand": "npm run build",
-    "devPath": "http://localhost:15523",
-    "distDir": "../dist",
-    "withGlobalTauri": false
+    "frontendDist": "../dist",
+    "devUrl": "http://localhost:15523"
   },
-  "package": {
-    "productName": "Requester",
-    "version": "1.1.3"
+  "bundle": {
+    "active": true,
+    "targets": "all",
+    "icon": [
+      "icons/32x32.png",
+      "icons/128x128.png",
+      "icons/128x128@2x.png",
+      "icons/icon.icns",
+      "icons/icon.ico"
+    ]
   },
-  "tauri": {
-    "allowlist": {
-      "all": false,
-      "shell": {
-        "all": false,
-        "open": true
-      },
-      "os": {
-        "all": true
-      },
-      "app": {
-        "all": true
-      }
-    },
-    "bundle": {
-      "active": true,
-      "targets": "all",
-      "identifier": "oxy-requester",
-      "icon": [
-        "icons/32x32.png",
-        "icons/128x128.png",
-        "icons/128x128@2x.png",
-        "icons/icon.icns",
-        "icons/icon.ico"
-      ]
-    },
-    "security": {
-      "csp": null
-    },
+  "productName": "Requester",
+  "mainBinaryName": "Requester",
+  "version": "1.1.4",
+  "identifier": "oxy-requester",
+  "plugins": {},
+  "app": {
+    "withGlobalTauri": false,
     "windows": [
       {
         "fullscreen": false,
@@ -47,8 +31,14 @@
         "width": 1000,
         "height": 520,
         "minWidth": 800,
-        "minHeight": 350
+        "minHeight": 350,
+        "useHttpsScheme": true,
+        "devtools": true,
+        "zoomHotkeysEnabled": true
       }
-    ]
+    ],
+    "security": {
+      "csp": null
+    }
   }
 }

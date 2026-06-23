@@ -31,12 +31,14 @@ pub fn check_app_version() {
     let mut parsed_content: Value =
         serde_json::from_str(&_json_content).expect("Failed to parse JSON content");
 
-
     if let Value::Object(obj) = &mut parsed_content {
         obj.insert("version".to_string(), json!(env!("CARGO_PKG_VERSION")));
     }
 
-    println!("Changing version in config to: {}", env!("CARGO_PKG_VERSION"));
+    println!(
+        "Changing version in config to: {}",
+        env!("CARGO_PKG_VERSION")
+    );
 
     let modified_content = serde_json::to_string_pretty(&parsed_content)
         .expect("Failed to serialize modified JSON content");

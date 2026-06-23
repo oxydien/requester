@@ -53,7 +53,7 @@ nav {
         class="nav-item"
         v-for="(index, page) in config.pages"
         :color="
-          $router.currentRoute.value.path == `/${page}/` ? 'secondary' : ''
+          $router.currentRoute.value.path === `/${page}/` ? 'secondary' : ''
         "
         :key="index"
         ><ReqTypeIcon :t="page.toLowerCase().trim()"
@@ -65,7 +65,7 @@ nav {
         iconOnly
         large
         class="nav-item"
-        :color="$router.currentRoute.value.path == '/' ? 'secondary' : ''"
+        :color="$router.currentRoute.value.path === '/' ? 'secondary' : ''"
         link="/"
         ><ReqMngIcon
       /></Button>
@@ -75,7 +75,7 @@ nav {
         class="nav-item"
         link="/settings/"
         :color="
-          $router.currentRoute.value.path == '/settings/' ? 'secondary' : ''
+          $router.currentRoute.value.path === '/settings/' ? 'secondary' : ''
         "
         ><SettingsIcon
       /></Button>
@@ -84,7 +84,7 @@ nav {
 </template>
 <script>
 import { defineComponent } from "vue";
-import { invoke } from "@tauri-apps/api/tauri";
+import { invoke } from "@tauri-apps/api/core";
 import { Button, SettingsIcon } from "omorphia";
 import ReqMngIcon from "../icons/ReqMngIcon.vue";
 import ReqTypeIcon from "../icons/ReqTypeIcon.vue";

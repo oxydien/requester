@@ -1,7 +1,10 @@
 use crate::filesys::get_app_path;
 use reqwest::header::{HeaderMap, HeaderName, HeaderValue};
-use serde::{Deserialize, Serialize};
+use reqwest::{Client, Method};
+use serde::{Deserialize, Deserializer, Serialize};
 use std::fs;
+use std::time::Instant;
+
 #[derive(Serialize, Deserialize, Clone)]
 pub struct RequestResponse {
     request: RequestInfo,
@@ -17,9 +20,9 @@ pub struct RequestInfo {
     headers: Option<Vec<HeaderItem>>,
 }
 
-#[derive(Serialize, Deserialize, Clone)]
+#[derive(Serialize, Clone)]
 pub struct ResponseInfo {
-    result: String,
+    bytes: Vec<u8>,
     status_code: u16,
     headers: Vec<HeaderItem>,
 }
@@ -35,34 +38,24 @@ pub async fn make_http_request(
     url: &str,
     data: Option<&str>,
     headers: Option<Vec<(&str, &str)>>,
-) -> Result<String, String> {
-    let client = reqwest::Client::new();
+) -> Result<RequestResponse, String> {
+    let client = Client::new();
     let mut request_builder = match method {
-        "GET" => client.get(url),
-        "PUT" => client.put(url),
-        "OPTIONS" => client.request(reqwest::Method::OPTIONS, url),
-        "HEAD" => client.request(reqwest::Method::HEAD, url),
-        "PATCH" => client.patch(url),
-        "POST" => client.post(url),
-        "DELETE" => client.delete(url),
-        "TRACE" => client.request(reqwest::Method::TRACE, url),
+        "GET"     => client.get(url),
+        "PUT"     => client.put(url),
+        "OPTIONS" => client.request(Method::OPTIONS, url),
+        "HEAD"    => client.request(Method::HEAD, url),
+        "PATCH"   => client.patch(url),
+        "POST"    => client.post(url),
+        "DELETE"  => client.delete(url),
+        "TRACE"   => client.request(Method::TRACE, url),
         _ => panic!("Invalid HTTP method"),
     };
 
     let data_str = data.map(|d| d.to_owned());
 
     if let Some(data) = data {
-        if let Ok(json_value) = serde_json::from_str::<&str>(data) {
-            let body_string = json_value.to_string();
-            request_builder = request_builder
-                .header(
-                    reqwest::header::CONTENT_TYPE,
-                    reqwest::header::HeaderValue::from_static("application/json"),
-                )
-                .body(body_string);
-        } else {
-            request_builder = request_builder.body(data.to_owned());
-        }
+        request_builder = request_builder.body(data.to_owned());
     }
 
     let mut headers_info = None;
@@ -86,14 +79,17 @@ pub async fn make_http_request(
         );
     }
 
-    let start_time = std::time::Instant::now();
+    // TIMER START
+    let start_time = Instant::now();
     let response = request_builder.send().await.map_err(|e| e.to_string())?;
-    let end_time = std::time::Instant::now();
-    let elapsed_time_ms = end_time.duration_since(start_time).as_millis();
 
     let status_code = response.status().as_u16();
     let response_headers = response.headers().clone();
-    let response_text = response.text().await.map_err(|e| e.to_string())?;
+    let response_bytes = response.bytes().await.map_err(|e| e.to_string())?;
+
+    // TIMER END
+    let end_time = Instant::now();
+    let elapsed_time_ms = end_time.duration_since(start_time).as_millis();
 
     let request_info = RequestInfo {
         method: method.to_string(),
@@ -103,7 +99,7 @@ pub async fn make_http_request(
     };
 
     let response_info = ResponseInfo {
-        result: response_text,
+        bytes: response_bytes.to_vec(),
         status_code,
         headers: response_headers
             .iter()
@@ -120,11 +116,11 @@ pub async fn make_http_request(
         time: elapsed_time_ms,
     };
 
-    let _ = append_to_history(request_response.clone());
+    if let Err(err) = append_to_history(request_response.clone()) {
+        eprintln!("Error while saving HTTP history {:?}", err);
+    }
 
-    let json_result = serde_json::to_string(&request_response).map_err(|e| e.to_string())?;
-
-    Ok(json_result)
+    Ok(request_response)
 }
 
 const MAX_HISTORY_ENTRIES: usize = 100;
@@ -149,7 +145,7 @@ pub fn append_to_history(
     existing_history.push(data);
 
     // Serialize and write back to the file
-    let history_json = serde_json::to_string_pretty(&existing_history)?;
+    let history_json = serde_json::to_string(&existing_history)?;
     fs::write(&file_path, history_json)?;
 
     Ok(())
@@ -173,7 +169,7 @@ pub fn read_history_file() -> Result<String, String> {
 
     // Serialize the updated history back to a JSON string
     let updated_history_str =
-        serde_json::to_string_pretty(&existing_history).map_err(|e| e.to_string())?;
+        serde_json::to_string(&existing_history).map_err(|e| e.to_string())?;
 
     Ok(updated_history_str)
 }
@@ -187,10 +183,37 @@ pub fn clear_history_file() -> Result<(), String> {
 
     // Serialize the empty history to a JSON string
     let empty_history_str =
-        serde_json::to_string_pretty(&empty_history).map_err(|e| e.to_string())?;
+        serde_json::to_string(&empty_history).map_err(|e| e.to_string())?;
 
     // Write the empty history to the file, effectively clearing its content
     fs::write(&file_path, empty_history_str).map_err(|e| e.to_string())?;
 
     Ok(())
+}
+
+#[derive(Deserialize)]
+struct RawResponseInfo {
+    #[serde(default)]
+    bytes: Option<Vec<u8>>,
+    #[serde(default)]
+    result: Option<String>,
+
+    status_code: u16,
+    headers: Vec<HeaderItem>,
+}
+
+impl<'de> Deserialize<'de> for ResponseInfo {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        let raw = RawResponseInfo::deserialize(deserializer)?;
+        Ok(ResponseInfo {
+            bytes: raw.bytes.unwrap_or_else(|| {
+                raw.result.unwrap_or_default().into_bytes()
+            }),
+            status_code: raw.status_code,
+            headers: raw.headers,
+        })
+    }
 }

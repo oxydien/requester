@@ -1,11 +1,9 @@
 use crate::filesys::get_app_path;
 use crate::request::http::RequestResponse;
-use serde::{Deserialize, Serialize};
 use serde_json::Error as JSONError;
 use std::io::Error as IOError;
 use std::{fs, path::PathBuf};
 
-// Define an error type for your module
 #[derive(Debug)]
 pub enum HistoryError {
     IO(IOError),
@@ -22,11 +20,6 @@ impl From<JSONError> for HistoryError {
     fn from(error: JSONError) -> Self {
         HistoryError::JSON(error)
     }
-}
-
-#[derive(Serialize, Deserialize)]
-struct HistoryData {
-    requests: Vec<RequestResponse>,
 }
 
 pub fn create_histories() -> () {
@@ -47,5 +40,3 @@ pub fn create_histories() -> () {
         }
     }
 }
-
-

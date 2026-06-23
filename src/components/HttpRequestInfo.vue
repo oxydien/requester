@@ -9,14 +9,16 @@
       min-width: 150px;
     }
   }
+
+  .copy-button {
+    float: right;
+  }
 }
 </style>
 
 <template>
   <div class="section request-info">
-    <Button @click="copyRequest(index)" style="float: right"
-      ><ClipboardCopyIcon /> Copy request</Button
-    >
+    <DropdownButton class="copy-button" :actions="copyActions" />
     <p>
       <strong :style="`color:var(--status-${item.response.status_code}-color)`"
         >Method:
@@ -41,8 +43,10 @@
 </template>
 <script>
 import { Button, ClipboardCopyIcon } from "omorphia";
+import DropdownButton from "./DropdownButton.vue";
 export default {
   components: {
+    DropdownButton,
     Button,
     ClipboardCopyIcon,
   },
@@ -58,8 +62,23 @@ export default {
   },
   emits: ["copyRequest"],
   methods: {
-    copyRequest(index) {
-      this.$emit("copyRequest", index);
+    copyRequest(index, features) {
+      this.$emit("copyRequest", index, features);
+    },
+    copyRequestAll() {
+      this.copyRequest(this.index, ["url", "queries", "headers", "body"]);
+    },
+    copyRequestUrl() {
+      this.copyRequest(this.index, ["url"]);
+    },
+    copyRequestHead() {
+      this.copyRequest(this.index, ["url", "queries", "headers"]);
+    },
+    copyRequestHeaders() {
+      this.copyRequest(this.index, ["headers"]);
+    },
+    copyRequestBody() {
+      this.copyRequest(this.index, ["body"]);
     },
   },
   computed: {
@@ -130,6 +149,15 @@ export default {
         511: "Network Authentication Required",
       };
     },
+    copyActions() {
+      return {
+        "Reuse all": this.copyRequestAll,
+        "Reuse URL": this.copyRequestUrl,
+        "Reuse HEAD": this.copyRequestHead,
+        "Reuse headers": this.copyRequestHeaders,
+        "Reuse BODY": this.copyRequestBody
+      }
+    }
   },
 };
 </script>

@@ -68,7 +68,14 @@ html {
   --status-511-color: #ff0e0e;
 
   --color-requester: #ff8a00;
-  --color-requester-dark: #804808;
+  --color-requester-highlight: #e7902c;
+  --color-requester-dark: #94550d;
+}
+
+:root, .dark-mode, .dark, * {
+  --color-brand: var(--color-requester) !important;
+  --color-brand-highlight: var(--color-requester-dark) !important;
+  --color-brand-shadow: #80480860 !important;
 }
 
 ::-webkit-scrollbar {
@@ -97,4 +104,24 @@ a {
 
 #HTTP_METHOD_DROPDOWN .selected {
   height: 40px;
+}
+
+pre {
+  margin: 0;
+}
+
+.just-flex {
+  display: flex;
+  gap: var(--gap-sm);
+  align-items: center;
+}
+
+.error {
+  margin: var(--gap-sm);
+  padding: var(--gap-sm);
+  border-radius: var(--radius-sm);
+  color: var(--color-red);
+  border: 1px solid var(--color-red);
+  font-size: 1.2rem;
+  font-weight: 500;
 }

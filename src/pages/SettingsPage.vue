@@ -37,7 +37,7 @@
       <Button
         style="display: inline; float: right; font-size: 1.2rem"
         color="highlight"
-        :disabled="JSON.stringify(config) == JSON.stringify(previousConfig)"
+        :disabled="JSON.stringify(config) === JSON.stringify(previousConfig)"
         @click="saveConfig"
         ><SaveIcon />Save</Button
       >
@@ -122,7 +122,7 @@
   </div>
 </template>
 <script>
-import { invoke } from "@tauri-apps/api/tauri";
+import { invoke } from "@tauri-apps/api/core";
 import { Button, TrashIcon, PlusIcon, Card, SaveIcon } from "omorphia";
 import OpenArrowIcon from "../components/icons/OpenArrowIcon.vue";
 export default {
