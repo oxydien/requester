@@ -4,6 +4,8 @@ use reqwest::{Client, Method};
 use serde::{Deserialize, Deserializer, Serialize};
 use std::fs;
 use std::time::Instant;
+use base64::Engine;
+use base64::prelude::{BASE64_STANDARD, BASE64_URL_SAFE_NO_PAD};
 
 #[derive(Serialize, Deserialize, Clone)]
 pub struct RequestResponse {
@@ -22,7 +24,7 @@ pub struct RequestInfo {
 
 #[derive(Serialize, Clone)]
 pub struct ResponseInfo {
-    bytes: Vec<u8>,
+    bytes: String,
     status_code: u16,
     headers: Vec<HeaderItem>,
 }
@@ -99,7 +101,7 @@ pub async fn make_http_request(
     };
 
     let response_info = ResponseInfo {
-        bytes: response_bytes.to_vec(),
+        bytes: BASE64_STANDARD.encode(response_bytes),
         status_code,
         headers: response_headers
             .iter()
@@ -194,7 +196,7 @@ pub fn clear_history_file() -> Result<(), String> {
 #[derive(Deserialize)]
 struct RawResponseInfo {
     #[serde(default)]
-    bytes: Option<Vec<u8>>,
+    bytes: Option<String>,
     #[serde(default)]
     result: Option<String>,
 
@@ -210,7 +212,7 @@ impl<'de> Deserialize<'de> for ResponseInfo {
         let raw = RawResponseInfo::deserialize(deserializer)?;
         Ok(ResponseInfo {
             bytes: raw.bytes.unwrap_or_else(|| {
-                raw.result.unwrap_or_default().into_bytes()
+                BASE64_STANDARD.encode(raw.result.unwrap_or_default().into_bytes())
             }),
             status_code: raw.status_code,
             headers: raw.headers,

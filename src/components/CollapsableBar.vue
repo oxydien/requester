@@ -54,13 +54,13 @@
   top: 0;
   height: var(--_h-big);
   border-radius: var(--gap-md);
-  border: none;
+  border-bottom: none;
   padding-inline: var(--gap-sm);
   --_pl-current: var(--gap-sm);
 
   &.open {
     border-radius: var(--gap-md) var(--gap-md) 0 0;
-    border: var(--_base-border);
+    border-bottom: var(--_base-border);
   }
 
   &::before {

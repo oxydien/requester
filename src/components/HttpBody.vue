@@ -142,7 +142,7 @@
 
     <div v-else>
       <div class="error" v-if="resHighlightContent.length > 70000">REQUESTER-WARN: Body too long ({{resHighlightContent.length}}B/70000B)</div>
-      <pre>{{ resHighlightContent }}</pre>
+      <pre>{{ textData }}</pre>
     </div>
   </div>
 </template>
@@ -193,11 +193,7 @@ export default {
       this.$refs.jsonNode.expandAll()
     },
     string2Bin(str) {
-      const result = [];
-      for (let i = 0; i < str.length; i++) {
-        result.push(str.charCodeAt(i));
-      }
-      return result;
+      return new TextEncoder().encode(str);
     },
   },
   computed: {
@@ -210,10 +206,10 @@ export default {
       return findContentTypeInHeaders(this.bodyData.headers);
     },
     textData() {
-      return this.bodyData.data || String.fromCharCode.apply(String, this.bodyData.bytes);
+      return this.bodyData.data || new TextDecoder().decode(this.byteData);
     },
     byteData() {
-      return this.bodyData.data ? this.string2Bin(this.bodyData.data) : this.bodyData.bytes;
+      return this.bodyData.data ? this.string2Bin(this.bodyData.data) : Uint8Array.fromBase64(this.bodyData.bytes);
     },
     imageDataUrl() {
       const uint8Array = new Uint8Array(this.byteData);

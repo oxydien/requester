@@ -34,6 +34,10 @@
   }
 }
 
+.tiny-send-button {
+  aspect-ratio: 1/1;
+}
+
 .send-button {
   width: calc(100% - 20px);
   margin: 10px;
@@ -81,6 +85,15 @@
           <Button color="danger" outline @click.stop="clearRequestForm">
             <TrashIcon />
             Clear
+          </Button>
+          <Button
+              @click.stop="sendRequest"
+              color="secondary"
+              iconOnly
+              class="tiny-send-button"
+              :disabled="this.generateURL === '' || requestInProgress"
+          >
+            <SendIcon />
           </Button>
         </template>
 

@@ -65,7 +65,7 @@ async fn send_netio_req(
 
 #[tauri::command]
 fn read_http_history() -> Result<String, String> {
-    Ok(http::read_history_file().unwrap())
+    http::read_history_file()
 }
 
 #[tauri::command]
